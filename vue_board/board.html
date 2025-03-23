@@ -61,10 +61,17 @@
       <div v-if="selectedPost" class="post-content">
         <h2>{{selectedPost.title}}</h2>
         <p>{{selectedPost.content}}</p>
+        <div v-if="isUpdate">
+          <label>제목<input type="text" v-model="editedTitle" /></label><br />
+          <label>내용<input type="text" v-model="editedContent" /></label><br />
+          <button @click="savePost">수정완료</button>
+        </div>
         <button @click="removePost">게시글 삭제</button>
+        <button @click="startEditing" v-if="!isUpdate">게시글 수정하기</button>
+
         <button @click="closePost">닫기</button>
       </div>
-      <div>
+      <div v-if="!isUpdate">
         <label>게시글 제목<input type="text" v-model="newPost.title" /></label
         ><br />
         <label>게시글 내용<input type="text" v-model="newPost.content" /></label
@@ -79,6 +86,7 @@
 
       createApp({
         setup() {
+          const isUpdate = ref(false);
           // 게시글 목록
           const posts = ref([
             {
@@ -152,10 +160,16 @@
             content: '',
           });
 
+          const editedTitle = ref('');
+          const editedContent = ref('');
+
           // 게시글 선택 함수 (클릭 시 실행)
           const selectPost = (post) => {
             // 클릭 시 선택한 게시글을 설정하는 코드를 작성하세요
             selectedPost.value = post;
+            // 게시글 수정할 때 필요함 (제목과 내용 바로 불러오기 위해)
+            editedTitle.value = post.title;
+            editedContent.value = post.content;
           };
 
           // 게시글 닫기 함수
@@ -185,6 +199,8 @@
               // 새 게시글 추가 후 입력 값 초기화
               newPost.value.title = '';
               newPost.value.content = '';
+            } else {
+              alert('값을 모두 입력해주세요.');
             }
           };
 
@@ -197,14 +213,30 @@
             closePost();
           };
 
+          // 게시글 수정하기 함수
+          const startEditing = () => {
+            isUpdate.value = !isUpdate.value;
+          };
+
+          // 게시글 수정완료 함수
+          const savePost = () => {
+            selectedPost.value.title = editedTitle.value;
+            selectedPost.value.content = editedContent.value;
+            isUpdate.value = !isUpdate.value;
+          };
           return {
             posts,
             selectedPost,
             newPost,
+            isUpdate,
+            editedTitle,
+            editedContent,
             selectPost,
             closePost,
             addPost,
             removePost,
+            startEditing,
+            savePost,
           };
         },
       }).mount('#app');
